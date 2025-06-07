@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres
+    # restart: ??? czy dac always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scannerdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  
+  scanner:
+    build: ./scanner
+    volumes:
+      - ./frontend:/app/frontend
+    depends_on:
+      - db
+  
+  volumes:
+    postgres_data:
+  
