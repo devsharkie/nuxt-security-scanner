@@ -13,18 +13,27 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U scanner"]
+      test: ["CMD-SHELL", "pg_isready -U scanner -d scannerdb"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
   
   scanner:
     build: ./scanner
     volumes:
       - ./frontend:/app/frontend
+    networks:
+      - backend
     depends_on:
-      - db
-  
+      db:
+        condition: service_healthy
+
+networks:
+  backend:
+    driver: bridge
+    name: backend
+
 volumes:
   postgres_data:
-  
