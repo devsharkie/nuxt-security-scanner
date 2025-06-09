@@ -2,7 +2,7 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
-from scans.vhtml_scan import scan_vue_ts_files
+from scans.pattern_detector import scan_vue_ts_files
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
