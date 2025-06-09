@@ -4,6 +4,29 @@ from sqlalchemy.orm import Session
 from log import log_issue
 from pathlib import Path
 
+DETECTION_PATTERNS = [
+    {
+        "pattern": "v-html",
+        "severity": "HIGH",
+        "message": "Found v-html directive"
+    },
+    {
+        "pattern": "eval(",
+        "severity": "HIGH",
+        "message": "Usage of eval() detected"
+    },
+    {
+        "pattern": ':href="userProvidedUrl"',
+        "severity": "MEDIUM",
+        "message": "Possible user-controlled URL injection"
+    },
+    {
+        "pattern": ':style="userProvidedStyles"',
+        "severity": "MEDIUM",
+        "message": "Possible user-controlled style injection"
+    },
+]
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -16,10 +39,7 @@ def scan_vue_ts_files(root_dir: str, session: Session) -> int:
         return 1
 
     for dirpath, dirnames, filenames in os.walk(root_dir):
-        relative_parts = Path(os.path.relpath(dirpath, root_dir)).parts
-        # Pomijamy node_modules
-        if "node_modules" in relative_parts:
-            continue
+        dirnames[:] = [d for d in dirnames if d not in {"node_modules", ".nuxt", "dist"}]
 
         for filename in filenames:
             if filename.endswith((".vue", ".ts")):
@@ -28,11 +48,12 @@ def scan_vue_ts_files(root_dir: str, session: Session) -> int:
                 try:
                     with open(path, encoding="utf-8") as f:
                         content = f.read()
-
-                        if "v-html" in content:
-                            found_issue = 1
-                            log_issue(session, "HIGH", "Found v-html directive", path)
-                            logger.warning(f"Issue found in {path}: 'v-html' directive.")
+                        
+                        for rule in DETECTION_PATTERNS:
+                            if rule["pattern"] in content:
+                                found_issue = 1
+                                log_issue(session, rule["severity"], rule["message"], path)
+                                logger.warning(f"Issue found in {path}: {rule['message']}")
 
                 except UnicodeDecodeError:
                     logger.error(f"UnicodeDecodeError in {path}")

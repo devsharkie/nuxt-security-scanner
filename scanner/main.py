@@ -2,12 +2,11 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
-from vhtml_scan import scan_vue_ts_files
+from scans.vhtml_scan import scan_vue_ts_files
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Konfiguracja połączenia z bazą danych
 DATABASE_URL = "postgresql://scanner:scanner@db:5432/scannerdb"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
