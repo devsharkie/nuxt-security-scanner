@@ -1,14 +1,15 @@
 import os
+import re
 import logging
 from sqlalchemy.orm import Session
 from log import log_issue
 from pathlib import Path
 
 DETECTION_PATTERNS = [
-    { "pattern": "v-html", "severity": "HIGH", "message": "Found v-html directive" },
-    { "pattern": "eval(", "severity": "HIGH", "message": "Usage of eval() detected" },
-    { "pattern": ':href="userProvidedUrl"', "severity": "MEDIUM", "message": "Possible user-controlled URL injection" },
-    { "pattern": ':style="userProvidedStyles"', "severity": "MEDIUM", "message": "Possible user-controlled style injection" },
+    { "pattern": r'v-html\s*=\s*"[^"]*"', "severity": "HIGH", "message": "Found v-html directive" },
+    { "pattern": r'eval\s*\(', "severity": "HIGH", "message": "Usage of eval() detected" },
+    { "pattern": r':href\s*=\s*"[^"]*"', "severity": "MEDIUM", "message": "Possible user-controlled URL injection" },
+    { "pattern": r':style\s*=\s*"[^"]*"', "severity": "MEDIUM", "message": "Possible user-controlled style injection" },
 ]
 
 logging.basicConfig(level=logging.INFO)
@@ -34,7 +35,8 @@ def scan_vue_ts_files(root_dir: str, session: Session) -> int:
                         content = f.read()
                         
                         for rule in DETECTION_PATTERNS:
-                            if rule["pattern"] in content:
+                              if re.search(rule["pattern"], content):
+                            # if rule["pattern"] in content:
                                 found_issue = 1
                                 log_issue(session, rule["severity"], rule["message"], path)
                                 logger.warning(f"Issue found in {path}: {rule['message']}")
