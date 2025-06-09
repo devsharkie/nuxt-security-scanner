@@ -60,13 +60,6 @@ Jeśli dany wzorzec zostanie znaleziony, skaner:
   - **Zalecenia:**
     - Używaj jawnego przypisywania tylko do dozwolonych właściwości:
       ```vue
-      <a
-      :style="{
-        color: userColor,
-        background: userBackground
-      }"
-    >
-      Click me
-    </a>
-    ```
+      <a :style="{ color: userColor, background: userBackground}">Click me</a>
+      ```
     - Jeśli :style pochodzi z propów (np. props.style) — można stosować whitelisty lub walidację typu.
