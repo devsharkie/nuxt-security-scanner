@@ -1,11 +1,11 @@
 <template>
   <div v-html="htmlContent"></div>
-  <a
-  :href="userProvidedUrl"
-  :style="userProvidedStyles"
-  >
-  click me
-  </a>
+    <a
+      :href="userProvidedUrl"
+      :style="userProvidedStyles"
+    >
+      click me
+    </a>
 </template>
 
 <script>

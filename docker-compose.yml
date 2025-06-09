@@ -29,6 +29,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    depends_on:
+      - db
 
 networks:
   backend:
