@@ -59,14 +59,14 @@ Jeśli dany wzorzec zostanie znaleziony, skaner:
   - **Dlaczego to niebezpieczne:** Możliwe ukrycie istotnych elementów strony, np. nadpisanie przycisku logowania przez link phishingowy.
   - **Zalecenia:**
     - Używaj jawnego przypisywania tylko do dozwolonych właściwości:
-    ```vue
-  <a
-  :style="{
-    color: userColor,
-    background: userBackground
-  }"
->
-  Click me
-</a>
-  ```
+      ```vue
+      <a
+      :style="{
+        color: userColor,
+        background: userBackground
+      }"
+    >
+      Click me
+    </a>
+    ```
     - Jeśli :style pochodzi z propów (np. props.style) — można stosować whitelisty lub walidację typu.
