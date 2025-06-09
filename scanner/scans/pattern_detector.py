@@ -10,6 +10,10 @@ DETECTION_PATTERNS = [
     { "pattern": r'eval\s*\(', "severity": "HIGH", "message": "Usage of eval() detected" },
     { "pattern": r':href\s*=\s*"[^"]*"', "severity": "MEDIUM", "message": "Possible user-controlled URL injection" },
     { "pattern": r':style\s*=\s*"[^"]*"', "severity": "MEDIUM", "message": "Possible user-controlled style injection" },
+    { "pattern": r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', "severity": "MEDIUM", "message": "Found possibly exposed email information" },
+    { "pattern": r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', "severity": "MEDIUM", "message": "Found possibly exposed phone information" },
+    { "pattern": r'\b\d{3}-\d{2}-\d{4}\b', "severity": "HIGH", "message": "Found possibly exposed SSN" },
+    { "pattern": r'api[_-]?key[_-]?([\'"|`])([a-zA-Z0-9]{32,45})\1', "severity": "HIGH", "message": "Found possibly exposed API key" },
 ]
 
 logging.basicConfig(level=logging.INFO)
