@@ -12,3 +12,4 @@ class ScanLog(Base):
     severity = Column(String)
     message = Column(String)
     file_path = Column(String)
+    vuln_id = Column(String)
