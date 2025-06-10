@@ -1,0 +1,6 @@
+{
+  "ignored_ids": [
+    "api_key_exposure::/config.js::line:42",
+    "cookie_insecure::/auth.vue::missing secure flag"
+  ]
+}
