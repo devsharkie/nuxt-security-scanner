@@ -16,7 +16,6 @@ SessionLocal = sessionmaker(bind=engine)
 def main():
     try:
         Base.metadata.create_all(engine)
-        logger.info("Database tables ensured.")
     except Exception as e:
         logger.error(f"Database setup failed: {e}")
         exit(1)
