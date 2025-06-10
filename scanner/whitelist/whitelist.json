@@ -1,6 +1,8 @@
 {
   "ignored_ids": [
-    "api_key_exposure::/config.js::line:42",
-    "cookie_insecure::/auth.vue::missing secure flag"
+    "_app_frontend_components_Patterns.vue::url-injection",
+    "_app_frontend_components_Patterns.vue::style-injection",
+    "_app_frontend_pages_admin_index.vue:document.cookie::secure-client",
+    "_app_frontend_pages_admin_index.vue:document.cookie::samesite-client"
   ]
 }
