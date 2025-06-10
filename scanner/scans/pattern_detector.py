@@ -4,7 +4,6 @@ import logging
 from sqlalchemy.orm import Session
 from log import log_issue
 from whitelist.utils import generate_vuln_id
-from pathlib import Path
 
 DETECTION_PATTERNS = [
     { "pattern": r'v-html\s*=\s*"[^"]*"', "severity": "HIGH", "message": "Found v-html directive", "type": "v-html" },

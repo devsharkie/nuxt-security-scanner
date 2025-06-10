@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
 from scans.pattern_detector import scan_vue_ts_files
+from cookies.cookie_static_scan import cookie_static_scan
 from log import log_session
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +25,9 @@ def main():
     try:
         scan_id = log_session(session)
         status = scan_vue_ts_files("/app/frontend", session, scan_id=scan_id)
+        cookie_status = cookie_static_scan("/app/frontend", session, scan_id=scan_id)
+        if status == 0 and cookie_status == 1:
+            status = 1
         session.commit()
     except Exception as e:
         logger.error(f"Scan error: {e}")
