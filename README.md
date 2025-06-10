@@ -25,7 +25,7 @@ DISCLAIMER: Obecna wersja to etap testowy uruchamiany lokalnie. Stąd uproszczen
 
 ## 2️⃣ Odpowiedź swoista — dynamiczna analiza
 
-## Pamięć immunologiczna - baza danych
+## 3️⃣ Pamięć immunologiczna - baza danych
 
 # 🛡️ Obrona bierna i czynna
 

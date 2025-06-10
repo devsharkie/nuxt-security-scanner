@@ -1,15 +1,34 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 
 Base = declarative_base()
 
+class Scan(Base):
+    __tablename__ = "scans"
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    result = Column(Boolean, default=False)
+    logs = relationship("ScanLog", back_populates="scan")
+    headers = relationship("HeaderScan", back_populates="scan")
+
 class ScanLog(Base):
     __tablename__ = "scan_logs"
-
+    scan_id = Column(Integer, ForeignKey("scans.id"))
     id = Column(Integer, primary_key=True, index=True)
+    vuln_id = Column(String, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     severity = Column(String)
     message = Column(String)
     file_path = Column(String)
-    vuln_id = Column(String)
+    scan = relationship("Scan", back_populates="logs")
+
+class HeaderScan(Base):
+    __tablename__ = "header_scans"
+    id = Column(Integer, primary_key=True, index=True)
+    scan_id = Column(Integer, ForeignKey("scans.id"))
+    vuln_id = Column(String, index=True)
+    header_name = Column(String)
+    header_value = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    scan = relationship("Scan", back_populates="headers")
