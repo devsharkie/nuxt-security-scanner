@@ -1,2 +1,3 @@
-def generate_id(vuln_type: str, file_path: str, detail: str) -> str:
-    return f"{vuln_type}::{file_path}::{detail}"
+def generate_vuln_id(file_path: str, vuln_type: str) -> str:
+    clean_path = file_path.replace("/", "_").replace("\\", "_")
+    return f"{clean_path}::{vuln_type.lower()}"

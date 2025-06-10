@@ -1,3 +1,4 @@
+<template></template>
 <!-- <template>
   <h1>Dashboard</h1>
   <p v-if="user">Welcome, {{ user.username }}!</p>
