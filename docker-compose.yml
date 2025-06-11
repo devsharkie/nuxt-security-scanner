@@ -29,18 +29,31 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      frontend:
+        condition: service_healthy
   
   frontend:
     build:
       context: ./frontend
     volumes:
       - ./frontend:/app
+      - /app/node_modules
+      - frontend_sqlite_data:/app/server
     ports:
       - "3000:3000"
     networks:
       - backend
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
 
 networks:
   backend:
@@ -49,3 +62,4 @@ networks:
 
 volumes:
   postgres_data:
+  frontend_sqlite_data:

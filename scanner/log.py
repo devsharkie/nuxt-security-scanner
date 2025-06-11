@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from models import ScanLog, Scan, HeaderScan
+from models import ScanLog, Scan
+from datetime import datetime
 
 def log_issue(session: Session, scan_id: int, severity: str, message: str, file_path: str, vuln_id: str):
   log = ScanLog(

@@ -8,11 +8,11 @@ const dbFilePath = path.resolve(process.cwd(), 'server', 'nuxt_security_test.sql
 let db: Awaited<ReturnType<typeof open>>;
 
 export default async function getDb() {
-    if (!db) {
-        db = await open({
-            filename: dbFilePath,
-            driver: sqlite3.Database
-        });
-    }
-    return db;
+  if (!db) {
+    db = await open({
+      filename: dbFilePath,
+      driver: sqlite3.Database
+    });
+  }
+  return db;
 }

@@ -19,6 +19,13 @@ SECURE_PATTERN = re.compile(r"secure\s*:\s*true")
 SAMESITE_PATTERN = re.compile(r"sameSite\s*:\s*['\"](strict|lax)['\"]", re.IGNORECASE)
 MAX_AGE_PATTERN = re.compile(r"maxAge\s*:\s*(\d+)")
 
+COOKIE_RULES = [
+  {"pattern": HTTP_ONLY_PATTERN, "severity": "LOW", "message": "Cookie missing httpOnly", "type": "httpOnly", "missing_check": True},
+  {"pattern": SECURE_PATTERN, "severity": "MEDIUM", "message": "Cookie missing secure", "type": "secure", "missing_check": True},
+  {"pattern": SAMESITE_PATTERN, "severity": "LOW", "message": "Cookie missing samesite", "type": "samesite", "missing_check": True},
+  {"pattern": MAX_AGE_PATTERN, "severity": "MEDIUM", "message": "Cookie expires in", "type": "max-age",  "custom_check": lambda m: int(m.group(1)) > MAX_COOKIE_EXPIRATION_DAYS * 86400, "custom_days": lambda m: int(m.group(1)) / (60 * 60 * 24)},
+]
+
 def analyze_cookie_options(options_block: str, cookie_name: str, file_path: str, session: Session, scan_id: int):
   base_id = f"{file_path}:{cookie_name}"
 
