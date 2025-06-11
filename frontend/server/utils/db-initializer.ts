@@ -1,11 +1,10 @@
-//hardcoding databse only for test purposes
-//very very bad practice in real projects
-
+// frontend/server/utils/db-initializer.ts
 import getDb from '~/server/utils/db';
 
-export default defineEventHandler(async () => {
+export async function initializeAndSeedDb() {
     if (process.env.NODE_ENV === 'production') {
-        throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
+        console.warn("Attempted to seed database in production. Skipping.");
+        return; // Or throw an error if this behavior is not desired
     }
 
     console.log("--- Inicjalizacja bazy danych (SQLite) ---");
@@ -27,8 +26,9 @@ export default defineEventHandler(async () => {
 
     try {
         await db.exec(sqlSetup);
-        return { status: 'success', message: 'Database seeded successfully!' };
+        console.log('Database seeded successfully!');
     } catch (error: any) {
-        throw createError({ statusCode: 500, statusMessage: error.message });
+        console.error('Error seeding database:', error.message);
+        throw error; // Re-throw to indicate a critical startup failure
     }
-});
+}
