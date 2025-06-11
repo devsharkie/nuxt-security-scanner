@@ -108,26 +108,20 @@ def run_access_control_audit(root_dir: str, session: Session, scan_id: int) -> i
         request_headers = HEADERS.copy()
         current_payload = None
 
-        # Logic for setting Basic Auth header for protected endpoints (/logged, /admin)
-        # This block determines if an Authorization header is needed.
         if endpoint not in ["/login", "/admin-login"] and auth_type != "none":
             user_creds = TEST_USERS.get(auth_type)
             if not user_creds:
                 logger.warning(f"Skipping test '{test_name}' due to missing credentials for '{auth_type}'.")
                 found_issue = 1
-                continue # Skip to the next test case
+                continue 
             request_headers.update(get_basic_auth_header(user_creds["username"], user_creds["password"]))
-        # No 'else' needed here for login endpoints, as their payload handles credentials directly
 
-        # Logic for setting payload for POST requests or overriding it
-        # This block should apply to any test case making a request with a payload.
         if payload_override:
             current_payload = payload_override
-        elif method == "POST": # Default empty payload for POST if not overridden
+        elif method == "POST": 
             current_payload = {}
 
         try:
-            # This request should be made for every test case within the loop
             response = requests.request(method, f"{BASE_URL}{endpoint}", json=current_payload, headers=request_headers, timeout=10)
 
             response_data = None
@@ -146,9 +140,9 @@ def run_access_control_audit(root_dir: str, session: Session, scan_id: int) -> i
             else:
                 logger.info(f"Test '{test_name}' got expected {response.status_code}")
 
-            # 2. Check Expected Message Part (if provided)
+            # 2. Check Expected Message Part 
             if is_test_passing and expected_message_part:
-                response_content = str(response_data) # Convert to string for broad search
+                response_content = str(response_data) 
                 if expected_message_part not in response_content:
                     is_test_passing = False
                     message = ( f"Test '{test_name}' FAILED: " f"'{expected_message_part}' not found in response. " f"Response: {response_data}")
@@ -185,114 +179,5 @@ def run_access_control_audit(root_dir: str, session: Session, scan_id: int) -> i
         except requests.exceptions.RequestException as e:
             logger.error(f"Critical error during test '{test_name}': {e}")
             found_issue = 1
-            vuln_id = generate_vuln_id(f"access_control:{endpoint}:{method}:{auth_type}", "ACCESS-C-CONN-FAIL")
-            if not is_whitelisted(vuln_id):
-                log_issue(session=session, scan_id=scan_id, severity="CRITICAL", message=f"Failed to execute test '{test_name}'. Connectivity issue.",
-                          file_path=f"api{endpoint}", vuln_id=vuln_id)
 
-    # This return statement MUST be outside the for loop
     return found_issue
-
-# def get_basic_auth_header(username: str, password: str) -> Dict[str, str]:
-#   credentials = f"{username}:{password}"
-#   encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-#   return {'Authorization': f'Basic {encoded_credentials}'}
-
-# def run_access_control_audit(root_dir: str, session: Session, scan_id: int) -> int:
-    
-#   found_issue = 0
-
-#   for test_case in ACCESS_CONTROL_TESTS:
-#     test_name = test_case["name"]
-#     endpoint = test_case["endpoint"]
-#     method = test_case["method"]
-#     auth_type = test_case["auth_type"]
-#     expected_status = test_case["expected_status"]
-#     expected_message_part = test_case.get("expected_message_part")
-#     payload_override = test_case.get("payload_override")
-#     post_login_check = test_case.get("post_login_check")
-
-#     logger.info(f"Running test: {test_name}")
-
-#     request_headers = HEADERS.copy()
-#     current_payload = None
-
-#     # For endpoints requiring Basic Auth (/logged, /admin)
-#     if endpoint not in ["/login", "/admin-login"] and auth_type != "none":
-#       user_creds = TEST_USERS.get(auth_type)
-#       if not user_creds:
-#         logger.warning(f"Skipping test '{test_name}' due to missing credentials for '{auth_type}'.")
-#         found_issue = 1
-#         continue
-#       request_headers.update(get_basic_auth_header(user_creds["username"], user_creds["password"]))
-#         # For login endpoints, credentials are in the payload. No header needed for 'auth_type' "user"/"admin" here
-#         # since it's handled by 'payload_override'.
-
-
-#       if payload_override:
-#         current_payload = payload_override
-#       elif method == "POST": # Default empty payload for POST if not overridden
-#         current_payload = {}
-
-#       try:
-#         response = requests.request(method, f"{BASE_URL}{endpoint}", json=current_payload, headers=request_headers, timeout=10)
-
-#         response_data = None
-#         try:
-#           response_data = response.json()
-#         except requests.exceptions.JSONDecodeError:
-#           response_data = response.text # Fallback to text if not JSON
-
-#         is_test_passing = True
-
-#             # 1. Check HTTP Status Code
-#         if response.status_code != expected_status:
-#           is_test_passing = False
-#           message = ( f"Test '{test_name}' FAILED: " f"Expected {expected_status}, got {response.status_code}. " f"Response: {response_data}")
-#           logger.error(message)
-#         else:
-#           logger.info(f"Test '{test_name}' got expected {response.status_code}")
-
-#             # 2. Check Expected Message Part (if provided)
-#         if is_test_passing and expected_message_part:
-#           response_content = str(response_data) # Convert to string for broad search
-#           if expected_message_part not in response_content:
-#             is_test_passing = False
-#             message = ( f"Test '{test_name}' FAILED: " f"'{expected_message_part}' not found in response. " f"Response: {response_data}")
-#             logger.error(message)
-#           else:
-#             logger.info(f"Test '{test_name}' Message OK: Found expected message part.")
-
-#         # 3. Post-login check for role manipulation
-#         # relevant for the login endpoints where the 'user' object is returned
-#         if is_test_passing and post_login_check and endpoint in ["/login", "/admin-login"]: # Apply to both login endpoints
-#           field = post_login_check["field"]
-#           expected_value = post_login_check["expected_value"]
-#           failure_message = post_login_check["failure_message"]
-
-#           actual_value = None
-#           if isinstance(response_data, dict):
-#             user_data = response_data.get("user")
-#             if isinstance(user_data, dict):
-#               actual_value = user_data.get(field)
-
-#           if actual_value != expected_value:
-#             is_test_passing = False
-#             message = f"Test '{test_name}' FAILED: {failure_message} Actual '{field}': {actual_value}"
-#             logger.error(message)
-#           else:
-#             logger.info(f"Test '{test_name}' Post-Login Check OK: '{field}' is '{actual_value}' as expected.")
-
-
-#         if not is_test_passing:
-#           found_issue = 1
-#           vuln_id = generate_vuln_id(f"access_control:{endpoint}:{method}:{auth_type}", "ACCESS-C-001")
-#           if not is_whitelisted(vuln_id):
-#             log_issue(session=session, scan_id=scan_id, severity="HIGH", message=f"Access Control Violation: Test '{test_name}' failed. {message}",
-#                       file_path=f"api{endpoint}", vuln_id=vuln_id)
-
-#       except requests.exceptions.RequestException as e:
-#         logger.error(f"Critical error during test '{test_name}': {e}")
-#         found_issue = 1
-
-#     return found_issue
