@@ -8,21 +8,32 @@ export async function initializeAndSeedDb() {
 
   const db = await getDb();
 
-  const sqlSetup = `
-    DROP TABLE IF EXISTS users;
-    CREATE TABLE users (
+  try {
+    await db.exec(`DROP TABLE IF EXISTS users`);
+
+    await db.exec(`
+      CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user'
-    );
-    INSERT INTO users (username, password, role) VALUES
-    ('admin', 'supersecretpassword', 'admin'),
-    ('user', 'password123', 'user');
-  `;
+      )
+    `);
 
-  try {
-    await db.exec(sqlSetup);
+    await db.exec(`
+      INSERT INTO users (username, password, role)
+      VALUES ('admin', 'supersecretpassword', 'admin')
+    `);
+
+    await db.exec(`
+      INSERT INTO users (username, password, role)
+      VALUES ('user', 'password123', 'user')
+    `);
+
+    await db.exec(`
+      INSERT INTO users (username, password, role)
+      VALUES ('user_test', 'testpassword', 'user')
+    `);
     console.log('Database seeded successfully!');
   } catch (error: any) {
     console.error('Error seeding database:', error.message);

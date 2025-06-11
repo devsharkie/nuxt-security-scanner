@@ -10,7 +10,6 @@ class Scan(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     result = Column(Boolean, default=False)
     logs = relationship("ScanLog", back_populates="scan")
-    headers = relationship("HeaderScan", back_populates="scan")
 
 class ScanLog(Base):
     __tablename__ = "scan_logs"
@@ -22,13 +21,3 @@ class ScanLog(Base):
     message = Column(String)
     file_path = Column(String)
     scan = relationship("Scan", back_populates="logs")
-
-class HeaderScan(Base):
-    __tablename__ = "header_scans"
-    id = Column(Integer, primary_key=True, index=True)
-    scan_id = Column(Integer, ForeignKey("scans.id"))
-    vuln_id = Column(String, index=True)
-    header_name = Column(String)
-    header_value = Column(String)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    scan = relationship("Scan", back_populates="headers")

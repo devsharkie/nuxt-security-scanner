@@ -37,6 +37,7 @@ services:
       context: ./frontend
     volumes:
       - ./frontend:/app
+      - /app/node_modules
       - frontend_sqlite_data:/app/server
     ports:
       - "3000:3000"
