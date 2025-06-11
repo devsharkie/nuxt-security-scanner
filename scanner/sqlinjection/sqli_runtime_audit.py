@@ -1,72 +1,58 @@
 import requests
 import time
-import sys
+import logging
+from whitelist.utils import generate_vuln_id
+from sqlalchemy.orm import Session
+from log import log_issue
+from typing import List, Dict, Any, Optional
 
-# Dajemy Nuxtowi chwilę na pełne uruchomienie się
 time.sleep(10)
 
-# Adres URL jest zbudowany z nazwy serwisu `frontend` i portu aplikacji
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 BASE_URL = "http://frontend:3000/api"
 HEADERS = {'Content-Type': 'application/json'}
+SQL_INJECTION_PAYLOAD = {"username": "' OR 1=1 --"}
 
-def run_test(name, url, payload, is_attack_expected_to_succeed):
-    """Uruchamia pojedynczy test i sprawdza wynik."""
-    print(f"--- 🧪 Test: {name} ---")
-    try:
-        response = requests.post(url, json=payload, headers=HEADERS)
-        # Zgłoś błąd, jeśli status HTTP to 4xx lub 5xx
-        response.raise_for_status()
-        data = response.json()
-        print(f"Odpowiedź serwera: {data}")
+def test_sqli(endpoint_name: str) -> Optional[List[Dict[str, Any]]]:
+  url = f"{BASE_URL}/{endpoint_name}"
+  logger.info(f"Testing endpoint: {endpoint_name}")
 
-        users_found = data.get("data")
-        test_passed = False
+  try:
+    response = requests.post(url, json=SQL_INJECTION_PAYLOAD, headers=HEADERS, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    users_found = data.get("data")
+    logger.debug(f"Response from {endpoint_name}: {data}")
+    return users_found
+  
+  except requests.exceptions.RequestException as e:
+    logger.error(f"Error testing {endpoint_name}: {e}")
 
-        if is_attack_expected_to_succeed:
-            # Atak się udał, jeśli zwrócono WIĘCEJ NIŻ 0 użytkowników
-            if users_found and len(users_found) > 0:
-                print("REZULTAT: 🚨 PODATNE (zgodnie z oczekiwaniami)")
-                test_passed = True
-            else:
-                print("REZULTAT: ❌ Atak się nie powiódł, choć powinien")
-        else:
-            # Obrona zadziałała, jeśli zwrócono DOKŁADNIE 0 użytkowników
-            if users_found and len(users_found) == 0:
-                print("REZULTAT: ✅ BEZPIECZNE (zgodnie z oczekiwaniami)")
-                test_passed = True
-            else:
-                print("REZULTAT: ❌ Endpoint nie zachował się bezpiecznie")
-        
-        return test_passed
+def sqli_results(root_dir: str, session: Session, scan_id: int, endpoints_to_test: List[str]) -> int:
+  found_issue = 0
 
-    except requests.exceptions.RequestException as e:
-        print(f"Błąd krytyczny testu: {e}")
-        return False
+  for endpoint in endpoints_to_test:
+    test_result=test_sqli(endpoint)
 
-# Złośliwy ładunek, który zawsze zwraca prawdę w zapytaniu SQL
-sql_injection_payload = {"username": "' OR 1=1 --"}
+    if test_result is None:
+      logger.error(f"Could not complete test for '{endpoint}'. Check connectivity and server logs.")
+      found_issue = 1
+      continue
 
-# Uruchomienie testów
-print("--- Rozpoczynanie skanowania podatności SQL Injection ---")
+    if isinstance(test_result, list) and len(test_result) > 0:
+      vuln_id = generate_vuln_id(str("api/{endpoint}"), "SQLI-001")
+      message = f"Endpoint '{endpoint}' is vulnerable to SQL Injection. Returned {len(test_result)} users."
+      logger.warning(message)
+      log_issue(session=session, scan_id=scan_id, severity="HIGH", message=message, file_path=f"api/{endpoint}", vuln_id=vuln_id)
+      found_issue = 1
 
-vulnerable_test_result = run_test(
-    "Atak na podatny endpoint (notsecure_sqli)",
-    f"{BASE_URL}/notsecure_sqli",
-    sql_injection_payload,
-    is_attack_expected_to_succeed=True
-)
+    elif isinstance(test_result, list) and len(test_result) == 0:
+      logger.info(f"Endpoint '{endpoint}' behaved securely against SQL injection.")
 
-secure_test_result = run_test(
-    "Atak na bezpieczny endpoint (secure_sqli)",
-    f"{BASE_URL}/secure_sqli",
-    sql_injection_payload,
-    is_attack_expected_to_succeed=False
-)
-
-print("\n--- ✅ Podsumowanie testów ---")
-if vulnerable_test_result and secure_test_result:
-    print("Wszystkie testy zakończone pomyślnie. Luki wykryte, zabezpieczenia działają.")
-    sys.exit(0) # Zakończ z kodem sukcesu
-else:
-    print("Jeden lub więcej testów zakończyło się niepowodzeniem.")
-    sys.exit(1) # Zakończ z kodem błędu
+    else:
+      message = f"Endpoint '{endpoint}' returned an unexpected data format or error during test."
+      log_issue(session=session, scan_id=scan_id, severity="MEDIUM", message=message, file_path=f"api/{endpoint}", vuln_id="SQLI-UNEXPECTED-RES")
+      found_issue = 1
+  return found_issue
