@@ -2,6 +2,7 @@ import requests
 import time
 import logging
 from whitelist.utils import generate_vuln_id
+from whitelist.manager import is_whitelisted
 from sqlalchemy.orm import Session
 from log import log_issue
 from typing import List, Dict, Any, Optional
@@ -44,10 +45,11 @@ def sqli_results(root_dir: str, session: Session, scan_id: int, endpoints_to_tes
 
     if isinstance(test_result, list) and len(test_result) > 0:
       vuln_id = generate_vuln_id(str("api/{endpoint}"), "SQLI-001")
-      message = f"Endpoint '{endpoint}' is vulnerable to SQL Injection. Returned {len(test_result)} users."
-      logger.warning(message)
-      log_issue(session=session, scan_id=scan_id, severity="HIGH", message=message, file_path=f"api/{endpoint}", vuln_id=vuln_id)
-      found_issue = 1
+      if not is_whitelisted(vuln_id):
+        message = f"Endpoint '{endpoint}' is vulnerable to SQL Injection. Returned {len(test_result)} users."
+        logger.warning(message)
+        log_issue(session=session, scan_id=scan_id, severity="HIGH", message=message, file_path=f"api/{endpoint}", vuln_id=vuln_id)
+        found_issue = 1
 
     elif isinstance(test_result, list) and len(test_result) == 0:
       logger.info(f"Endpoint '{endpoint}' behaved securely against SQL injection.")
@@ -56,5 +58,5 @@ def sqli_results(root_dir: str, session: Session, scan_id: int, endpoints_to_tes
       message = f"Endpoint '{endpoint}' returned an unexpected data format or error during test."
       log_issue(session=session, scan_id=scan_id, severity="MEDIUM", message=message, file_path=f"api/{endpoint}", vuln_id="SQLI-UNEXPECTED-RES")
       found_issue = 1
-      
+
   return found_issue
