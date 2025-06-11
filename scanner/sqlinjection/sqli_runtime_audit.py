@@ -30,6 +30,7 @@ def test_sqli(endpoint_name: str) -> Optional[List[Dict[str, Any]]]:
   except requests.exceptions.RequestException as e:
     logger.error(f"Error testing {endpoint_name}: {e}")
 
+
 def sqli_results(root_dir: str, session: Session, scan_id: int, endpoints_to_test: List[str]) -> int:
   found_issue = 0
 
@@ -55,4 +56,5 @@ def sqli_results(root_dir: str, session: Session, scan_id: int, endpoints_to_tes
       message = f"Endpoint '{endpoint}' returned an unexpected data format or error during test."
       log_issue(session=session, scan_id=scan_id, severity="MEDIUM", message=message, file_path=f"api/{endpoint}", vuln_id="SQLI-UNEXPECTED-RES")
       found_issue = 1
+      
   return found_issue

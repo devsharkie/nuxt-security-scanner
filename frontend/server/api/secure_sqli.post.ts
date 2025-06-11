@@ -3,14 +3,12 @@ import getDb from '~/server/utils/db';
 export default defineEventHandler(async (event) => {
   const { username } = await readBody(event);
   
-  if (!username) {
+  if (!username) 
     throw createError({ statusCode: 400, message: 'Missing username' });
-  }
 
   const db = await getDb();
 
-  // ✅ BEZPIECZEŃSTWO: Użycie zapytań parametryzowanych.
-  // Znak zapytania (?) to placeholder. Wartość jest przekazywana osobno.
+  //PARAMETRYZOWANE ZAPYTANIE Z PLACEHOLDEREM
   const query = 'SELECT id, username, role FROM users WHERE username = ?';
   const params = [username];
 
