@@ -1,3 +1,10 @@
+<script>
+export default {
+  data() {
+    return { htmlContent: "<strong>Hello</strong>" };
+  }
+};
+</script>
 <template>
   <div v-html="htmlContent"></div>
     <a
@@ -7,13 +14,3 @@
       click me
     </a>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      htmlContent: "<strong>Hello</strong>"
-    };
-  }
-};
-</script>
