@@ -2,7 +2,6 @@
 //very very bad practice in real projects
 
 import getDb from '~/server/utils/db';
-import type { User } from '~/types/user';
 
 export default defineEventHandler(async () => {
     if (process.env.NODE_ENV === 'production') {
