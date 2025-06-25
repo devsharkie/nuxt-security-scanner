@@ -1,5 +1,48 @@
 # 🐳 NUXT IMMUNE SYSTEM
 
+## PROJECT STRUCTURE & GOALS
+At its current stage, the project is a tool for local security analysis of applications built with Nuxt. Its main components are:
+- scanner/ – a security scanner written in Python, run as a Docker container, representing the immune system of the project
+- frontend/ – a Nuxt3 frontend (run separately in a container), which acts as the "organism" to be scanned
+- Database – scanning logs are stored in PostgreSQL, forming the immune memory of the system
+
+The project focuses not only on detection, but also on education and automation in secure code development. As part of its creation, it includes examples of both insecure and secure code that meet safety standards and can be reused in other repositories—for example: login mechanisms, cookie management, or access control for admin panels.
+
+## DETECTED THREAT TYPES
+- Incorrect cookie configurations (e.g., missing Secure, HttpOnly, expiration date)
+- SQL Injection vulnerabilities
+- XSS – potential script injection points
+- Access control issues
+DISCLAIMER: The current version is a local testing stage. Hence, there are simplifications such as:
+Hardcoded login credentials
+No password hashing
+Simplified scanning rules tailored to specific cases
+
+## Immune System Metaphor
+The presentation focuses on theory and the correlation between technical solutions and the physiology of the immune system. It aims to answer:
+How do security systems mimic the body's biological defenses? What key concepts does this metaphor cover?
+## 1️⃣ Innate Response — Static Analysis
+The innate immune response is the body’s first line of defense, acting quickly and broadly. In our system, this corresponds to Static Application Security Testing (SAST).
+- How it works: The scanner inspects the application’s source code (e.g., Vue/TypeScript files) without executing it. It’s like monitoring the skin or mucous membranes for threats before they penetrate the body.
+- Examples: Detecting incorrect cookie settings, Identifying potential XSS vectors
+## 2️⃣ Adaptive Response — Dynamic Analysis
+When a threat passes the first line of defense, the adaptive immune response engages—more precise and targeted. In our project, this is Dynamic Application Security Testing (DAST).
+- How it works: The scanner interacts with the running application, sending specially crafted requests and analyzing the responses. This mirrors specialized immune cells targeting specific pathogens already in the bloodstream.
+- Examples: Testing for SQL injection by injecting malicious queries, Auditing access control by attempting logins and accessing protected resources with varying permissions
+## 3️⃣ Immune Memory — The Database
+The immune system remembers previously encountered pathogens to react faster and more effectively in the future. In our system, PostgreSQL acts as the immune memory.
+- How it works: All scanning results, detected vulnerabilities, and test statuses are permanently logged in the database. This allows for progress tracking, trend analysis, and learning from previous scans.
+- Benefits: Building a security history for the application, With further expansion and more detailed logs, the potential to create a smarter, learning defense system (e.g., via machine learning)
+# 🛡️ Passive and Active Defense
+- Active defense involves deliberate, proactive actions to test and improve resistance. These are like vaccinations—regular, controlled application tests using our scanner. We perform a “controlled attack” (e.g., an SQL injection attempt) in a safe environment to “teach” the system how to respond and determine its resistance to known threats.
+- Passive defense includes mechanisms built into the code and environment that always work preventively. Examples include input sanitization, secure HTTP headers (e.g., Content-Security-Policy), or default security parameters for cookies. These are like the body’s natural protective barriers that minimize infection risk. "Serum" in this context means delivering an immediate fix (e.g., a specific blocking script, WAF rule, or quick code patch) for an issue that has already occurred. Such interventions might not be permanently logged in the "immune memory" (the database) if their goal is instant incident resolution.
+# 🚀 Expansion Potential
+The “Nuxt Immune System” project is flexible and has great potential for future growth:
+- CI/CD integration: Ability to integrate the scanner into Continuous Integration/Continuous Delivery pipelines. This would allow automated, periodic scanning or triggering scans on each commit, ensuring continuous security verification and early detection.
+- Extended scan coverage: Adding new types of threats and enhancing detection algorithms.
+- Enhanced immune memory: Implementing advanced reports, dashboards, and predictive mechanisms based on collected data.
+- Improved "vaccines": Creating more complex and realistic attack scenarios for dynamic analysis.
+
 ## STRUKTURA PROJEKTU I CELE
 Projekt na obecnym etapie jest narzędziem do lokalnej analizy bezpieczeństwa aplikacji opartych o Nuxt. Jego głównymi komponentami są:
   - scanner/ - skaner bezpieczeństwa napisany w Pythonie uruchamiany jako kontener Docker, stanowi układ odpornościowy projektu
